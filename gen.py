@@ -1,4 +1,6 @@
+#Carpio Monjaraz Fernando Aldair
 # Rivera Martinez Cristhian Antonio
+
 
 import random
 
@@ -71,12 +73,18 @@ def formar_parejas(population, genealogia):
     
     return parejas
 
-def mutar(individuo, prob=0.0001):
+def mutar(individuo, prob=0.0001, max_mutaciones=2):
     # Mutar cada característica
     individuo_mutado = individuo.copy()
+    mutaciones= 0
+
     for i in range(len(individuo_mutado)):
+        if mutaciones >= max_mutaciones:
+            break
         if random.random() < prob:
             individuo_mutado[i] = random.randint(9, UPPER)
+            mutaciones += 1
+
     return individuo_mutado
 
 def es_perfecto(individuo):
