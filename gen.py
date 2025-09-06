@@ -4,6 +4,8 @@
 
 import random
 
+LOG_FILE = "registro.txt"
+
 NUM_FEATURES = 20
 LOWER = 1
 UPPER = 9
@@ -77,20 +79,30 @@ def mutar(individuo, prob=0.0001, max_mutaciones=2):
     # Mutar cada característica
     individuo_mutado = individuo.copy()
     mutaciones= 0
+    muto_gen= False
+    genes_mutados =[]
 
     for i in range(len(individuo_mutado)):
-        if mutaciones >= max_mutaciones:
+        if mutaciones >= max_mutaciones: #Con esto aseguramos que solamente dos o menos genes por individuo mutaron
             break
         if random.random() < prob:
             individuo_mutado[i] = random.randint(9, UPPER)
             mutaciones += 1
+            muto_gen = True #Con esto detectamos si un gen muto, para nuestro reporte
 
-    return individuo_mutado
+    return individuo_mutado, muto_gen
+
+def registrar_individuo(generacion, individuo_id, genes, mutado):
+    with open (LOG_FILE, "a") as f:
+        f.write(f"Generacion {generacion}, ID {individuo_id}, Genes{genes}, Mutacion{'Si'if mutado else 'No'}\n")
 
 def es_perfecto(individuo):
     return all(g == UPPER for g in individuo)
 
 def main():
+
+    open(LOG_FILE, "w").close()
+
     population = create_initial_population(POPULATION_SIZE, NUM_FEATURES, LOWER, UPPER)
     genealogia = {ind[1]: [] for ind in population}
     
@@ -113,11 +125,14 @@ def main():
             hijo1_genes, hijo2_genes = reproducir(padre1[0], padre2[0])
             
             # Mutar solo el segundo hijo
-            hijo2_genes = mutar(hijo2_genes, prob=0.01)
+            hijo2_genes, mutado = mutar(hijo2_genes, prob=0.04)
             
             # Crear nuevos individuos
             hijo1 = (hijo1_genes, siguiente_id, generacion)
             hijo2 = (hijo2_genes, siguiente_id + 1, generacion)
+
+            registrar_individuo(generacion, siguiente_id, hijo1_genes, False)
+            registrar_individuo(generacion, siguiente_id + 1, hijo2_genes, mutado)
             
             # Actualizar genealogía
             nuevo_genealogia[siguiente_id] = [padre1[1], padre2[1]]
